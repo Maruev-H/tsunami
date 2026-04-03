@@ -1,6 +1,14 @@
 "use client";
 
-import { FormEvent, MouseEvent, useMemo, useState } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  MouseEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession, signIn, signOut } from "next-auth/react";
 import type { MenuCategory, MenuData, MenuItem } from "../../lib/types";
@@ -21,6 +29,21 @@ async function fetchMenu(): Promise<MenuData> {
 
 async function saveMenu(data: MenuData): Promise<void> {
   await api.put("/api/menu", data);
+}
+
+function downloadMenuJsonFile(menu: MenuData) {
+  const blob = new Blob([JSON.stringify(menu, null, 2)], {
+    type: "application/json;charset=utf-8",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "menu.json";
+  a.rel = "noopener";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 function validateItemDraft(state: AdminState): string | null {
@@ -60,7 +83,14 @@ export default function AdminPage() {
 
   if (status === "loading") {
     return (
-      <div className="ts-card" style={{ padding: "1.4rem 1.5rem", maxWidth: 420, marginInline: "auto" }}>
+      <div
+        className="ts-card"
+        style={{
+          padding: "1.4rem 1.5rem",
+          maxWidth: 420,
+          marginInline: "auto",
+        }}
+      >
         <p style={{ fontSize: "0.9rem" }}>Проверяем сессию…</p>
       </div>
     );
@@ -68,15 +98,28 @@ export default function AdminPage() {
 
   if (!isAdmin) {
     return (
-      <div className="ts-card" style={{ padding: "1.4rem 1.5rem", maxWidth: 420, marginInline: "auto" }}>
+      <div
+        className="ts-card"
+        style={{
+          padding: "1.4rem 1.5rem",
+          maxWidth: 420,
+          marginInline: "auto",
+        }}
+      >
         <div className="ts-page-header" style={{ marginBottom: "0.9rem" }}>
           <h1 className="ts-page-title">Admin · Tsunami</h1>
           <p className="ts-page-subtitle">
-            Вход только для сотрудников ресторана. Используйте выданные логин и пароль.
+            Вход только для сотрудников ресторана. Используйте выданные логин и
+            пароль.
           </p>
         </div>
-        <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "0.7rem" }}>
-          <label style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+        <form
+          onSubmit={handleLogin}
+          style={{ display: "flex", flexDirection: "column", gap: "0.7rem" }}
+        >
+          <label
+            style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}
+          >
             <span style={{ fontSize: "0.8rem" }}>Логин</span>
             <input
               type="text"
@@ -93,7 +136,9 @@ export default function AdminPage() {
               }}
             />
           </label>
-          <label style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+          <label
+            style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}
+          >
             <span style={{ fontSize: "0.8rem" }}>Пароль</span>
             <input
               type="password"
@@ -111,7 +156,9 @@ export default function AdminPage() {
             />
           </label>
           {authError && (
-            <p style={{ fontSize: "0.8rem", color: "var(--danger)" }}>{authError}</p>
+            <p style={{ fontSize: "0.8rem", color: "var(--danger)" }}>
+              {authError}
+            </p>
           )}
           <button
             type="submit"
@@ -158,6 +205,16 @@ function AdminPanel({ onSignOut }: { onSignOut: () => void }) {
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    return () => {
+      if (imagePreviewUrl) {
+        URL.revokeObjectURL(imagePreviewUrl);
+      }
+    };
+  }, [imagePreviewUrl]);
 
   const mutation = useMutation({
     mutationFn: saveMenu,
@@ -263,6 +320,7 @@ function AdminPanel({ onSignOut }: { onSignOut: () => void }) {
 
     const next: MenuData = { ...data, categories: nextCategories };
     mutation.mutate(next);
+    setImagePreviewUrl(null);
     setDraft((prev) => ({
       ...prev,
       name: "",
@@ -298,8 +356,13 @@ function AdminPanel({ onSignOut }: { onSignOut: () => void }) {
     }
   };
 
-  const handleEditClick = (categoryId: string, item: MenuItem, e: MouseEvent) => {
+  const handleEditClick = (
+    categoryId: string,
+    item: MenuItem,
+    e: MouseEvent,
+  ) => {
     e.preventDefault();
+    setImagePreviewUrl(null);
     setDraft({
       categoryId,
       name: item.name,
@@ -313,6 +376,7 @@ function AdminPanel({ onSignOut }: { onSignOut: () => void }) {
 
   const handleCancelEdit = () => {
     setEditingItemId(null);
+    setImagePreviewUrl(null);
     setDraft((prev) => ({
       ...prev,
       name: "",
@@ -323,29 +387,34 @@ function AdminPanel({ onSignOut }: { onSignOut: () => void }) {
     setItemError(null);
   };
 
-  const handleUploadImage = async (e: MouseEvent) => {
-    e.preventDefault();
+  const handleImageFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
     setImageError(null);
+    if (!file) return;
 
-    if (!draft.image.trim()) {
-      setImageError("Укажите URL изображения для загрузки.");
+    if (!file.type.startsWith("image/")) {
+      setImageError("Выберите файл изображения (JPEG, PNG, WebP или GIF).");
       return;
     }
 
+    setImagePreviewUrl(URL.createObjectURL(file));
+
     try {
       setIsUploadingImage(true);
-      const response = await api.post<{ link: string; shortLink: string | null }>(
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await api.post<{ link: string }>(
         "/api/images",
-        {
-          url: draft.image.trim(),
-        },
+        formData,
       );
       setDraft((prev) => ({ ...prev, image: response.data.link }));
-    } catch (error: any) {
+      setImagePreviewUrl(null);
+    } catch (err: any) {
       setImageError(
-        error?.response?.data?.message ??
-          error?.message ??
-          "Не удалось загрузить изображение. Проверьте URL.",
+        err?.response?.data?.message ??
+          err?.message ??
+          "Не удалось загрузить файл. Проверьте настройки S3 на сервере.",
       );
     } finally {
       setIsUploadingImage(false);
@@ -356,34 +425,69 @@ function AdminPanel({ onSignOut }: { onSignOut: () => void }) {
     <div className="ts-grid ts-grid-2" style={{ gap: "1.2rem" }}>
       <section className="ts-card" style={{ padding: "1rem 1.1rem" }}>
         <div className="ts-page-header" style={{ marginBottom: "0.9rem" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: "0.75rem", alignItems: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: "0.75rem",
+              alignItems: "center",
+            }}
+          >
             <div>
               <h1 className="ts-page-title">Админ-панель</h1>
               <p className="ts-page-subtitle">
-                Управляйте категориями и блюдами. Все изменения сохраняются в JSON-файл и
-                мгновенно доступны на сайте.
+                Управляйте категориями и блюдами. Все изменения сохраняются в
+                JSON-файл и мгновенно доступны на сайте.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={onSignOut}
+            <div
               style={{
-                borderRadius: "999px",
-                padding: "0.3rem 0.8rem",
-                border: "1px solid rgba(148,163,184,0.8)",
-                background: "transparent",
-                color: "var(--muted)",
-                fontSize: "0.8rem",
-                cursor: "pointer",
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "0.5rem",
+                alignItems: "center",
               }}
             >
-              Выйти
-            </button>
+              <button
+                type="button"
+                onClick={() => data && downloadMenuJsonFile(data)}
+                disabled={!data}
+                style={{
+                  borderRadius: "var(--radius-md)",
+                  padding: "0.3rem 0.8rem",
+                  border: "1px solid var(--primary)",
+                  background: "var(--primary)",
+                  color: "#f9fafb",
+                  fontSize: "0.8rem",
+                  cursor: data ? "pointer" : "not-allowed",
+                  opacity: data ? 1 : 0.5,
+                }}
+              >
+                Скачать menu.json
+              </button>
+              <button
+                type="button"
+                onClick={onSignOut}
+                style={{
+                  borderRadius: "999px",
+                  padding: "0.3rem 0.8rem",
+                  border: "1px solid rgba(148,163,184,0.8)",
+                  background: "transparent",
+                  color: "var(--muted)",
+                  fontSize: "0.8rem",
+                  cursor: "pointer",
+                }}
+              >
+                Выйти
+              </button>
+            </div>
           </div>
         </div>
 
         {isLoading && (
-          <p style={{ fontSize: "0.9rem", color: "var(--muted)" }}>Загружаем меню…</p>
+          <p style={{ fontSize: "0.9rem", color: "var(--muted)" }}>
+            Загружаем меню…
+          </p>
         )}
         {isError && (
           <p style={{ fontSize: "0.9rem", color: "var(--danger)" }}>
@@ -411,8 +515,16 @@ function AdminPanel({ onSignOut }: { onSignOut: () => void }) {
                     alignItems: "baseline",
                   }}
                 >
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.15rem" }}>
-                    <strong style={{ fontSize: "0.9rem" }}>{category.name}</strong>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.15rem",
+                    }}
+                  >
+                    <strong style={{ fontSize: "0.9rem" }}>
+                      {category.name}
+                    </strong>
                     <span
                       style={{
                         fontSize: "0.75rem",
@@ -510,7 +622,11 @@ function AdminPanel({ onSignOut }: { onSignOut: () => void }) {
             </h2>
             <form
               onSubmit={handleAddCategory}
-              style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.5rem",
+              }}
             >
               <input
                 type="text"
@@ -564,14 +680,27 @@ function AdminPanel({ onSignOut }: { onSignOut: () => void }) {
             </h2>
             <form
               onSubmit={handleAddItem}
-              style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.5rem",
+              }}
             >
-              <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+              <label
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.25rem",
+                }}
+              >
                 <span style={{ fontSize: "0.8rem" }}>Категория</span>
                 <select
                   value={draft.categoryId}
                   onChange={(e) =>
-                    setDraft((prev) => ({ ...prev, categoryId: e.target.value }))
+                    setDraft((prev) => ({
+                      ...prev,
+                      categoryId: e.target.value,
+                    }))
                   }
                   style={{
                     borderRadius: "var(--radius-md)",
@@ -591,7 +720,13 @@ function AdminPanel({ onSignOut }: { onSignOut: () => void }) {
                 </select>
               </label>
 
-              <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+              <label
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.25rem",
+                }}
+              >
                 <span style={{ fontSize: "0.8rem" }}>Название блюда</span>
                 <input
                   type="text"
@@ -611,7 +746,13 @@ function AdminPanel({ onSignOut }: { onSignOut: () => void }) {
                 />
               </label>
 
-              <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+              <label
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.25rem",
+                }}
+              >
                 <span style={{ fontSize: "0.8rem" }}>Цена, ₽</span>
                 <input
                   type="text"
@@ -624,71 +765,105 @@ function AdminPanel({ onSignOut }: { onSignOut: () => void }) {
                     borderRadius: "var(--radius-md)",
                     border: "1px solid var(--border-subtle)",
                     padding: "0.5rem 0.7rem",
-                    background: "rgba(15,23,42,0.9)",
-                    color: "var(--foreground)",
                     fontSize: "0.85rem",
                   }}
                 />
               </label>
 
-              <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-                <span style={{ fontSize: "0.8rem" }}>
-                  Изображение (URL, загрузка в ImageBan)
-                </span>
-                <div style={{ display: "flex", gap: "0.4rem" }}>
-                  <input
-                    type="text"
-                    value={draft.image}
-                    onChange={(e) =>
-                      setDraft((prev) => ({ ...prev, image: e.target.value }))
-                    }
-                    placeholder="https://пример.ру/изображение.jpg"
-                    style={{
-                      flex: 1,
-                      borderRadius: "var(--radius-md)",
-                      border: "1px solid var(--border-subtle)",
-                      padding: "0.5rem 0.7rem",
-                      background: "#ffffff",
-                      color: "#111827",
-                      fontSize: "0.85rem",
-                    }}
-                  />
+              <label
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.25rem",
+                }}
+              >
+                <span style={{ fontSize: "0.8rem" }}>Изображение (загрузка в S3)</span>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={handleImageFileChange}
+                  style={{ display: "none" }}
+                  aria-hidden
+                />
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "0.4rem",
+                    alignItems: "center",
+                  }}
+                >
                   <button
                     type="button"
-                    onClick={handleUploadImage}
+                    onClick={() => fileInputRef.current?.click()}
                     disabled={isUploadingImage}
                     style={{
                       borderRadius: 10,
                       padding: "0.4rem 0.8rem",
-                      border: "1px solid #042e59",
-                      background: "#042e59",
-                      color: "#f9fafb",
+                      border: "1px solid rgba(148,163,184,0.9)",
+                      background: "transparent",
+                      color: "var(--foreground)",
                       fontSize: "0.8rem",
                       cursor: isUploadingImage ? "not-allowed" : "pointer",
                       opacity: isUploadingImage ? 0.7 : 1,
                     }}
                   >
-                    Загрузить
+                    {isUploadingImage ? "Загрузка в S3…" : "Выбрать файл"}
                   </button>
-                </div>
-                {imageError && (
-                  <p style={{ fontSize: "0.8rem", color: "var(--danger)" }}>{imageError}</p>
-                )}
-                {draft.image && (
                   <span style={{ fontSize: "0.75rem", color: "var(--muted)" }}>
-                    Текущее изображение: {draft.image}
+                    Только файл с устройства; после загрузки URL подставится автоматически
                   </span>
+                </div>
+                {(imagePreviewUrl || draft.image) && (
+                  <div
+                    style={{
+                      marginTop: "0.35rem",
+                      borderRadius: "var(--radius-md)",
+                      border: "1px solid var(--border-subtle)",
+                      overflow: "hidden",
+                      maxWidth: 220,
+                      background: "rgba(15,23,42,0.04)",
+                    }}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={imagePreviewUrl || draft.image}
+                      alt=""
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        height: "auto",
+                        maxHeight: 140,
+                        objectFit: "contain",
+                      }}
+                    />
+                  </div>
+                )}
+                {imageError && (
+                  <p style={{ fontSize: "0.8rem", color: "var(--danger)" }}>
+                    {imageError}
+                  </p>
                 )}
               </label>
 
-              <label style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+              <label
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.25rem",
+                }}
+              >
                 <span style={{ fontSize: "0.8rem" }}>
                   Описание (Markdown поддерживается)
                 </span>
                 <textarea
                   value={draft.description}
                   onChange={(e) =>
-                    setDraft((prev) => ({ ...prev, description: e.target.value }))
+                    setDraft((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
                   }
                   rows={4}
                   placeholder="Краткое, но аппетитное описание. Можно выделять **жирный** и _курсив_."
@@ -705,7 +880,9 @@ function AdminPanel({ onSignOut }: { onSignOut: () => void }) {
               </label>
 
               {itemError && (
-                <p style={{ fontSize: "0.8rem", color: "var(--danger)" }}>{itemError}</p>
+                <p style={{ fontSize: "0.8rem", color: "var(--danger)" }}>
+                  {itemError}
+                </p>
               )}
               {mutation.isError && (
                 <p style={{ fontSize: "0.8rem", color: "var(--danger)" }}>
@@ -726,7 +903,10 @@ function AdminPanel({ onSignOut }: { onSignOut: () => void }) {
                   color: "#f9fafb",
                   fontSize: "0.85rem",
                   fontWeight: 500,
-                  cursor: draftError || mutation.isPending ? "not-allowed" : "pointer",
+                  cursor:
+                    draftError || mutation.isPending
+                      ? "not-allowed"
+                      : "pointer",
                   opacity: draftError || mutation.isPending ? 0.6 : 1,
                 }}
               >
@@ -758,4 +938,3 @@ function AdminPanel({ onSignOut }: { onSignOut: () => void }) {
     </div>
   );
 }
-

@@ -10,7 +10,7 @@ export function MenuCategorySection({ category, sectionId }: Props) {
   return (
     <section
       id={sectionId}
-      style={{ marginBottom: "1.5rem", scrollMarginTop: "0.5rem" }}
+      style={{ marginBottom: "1.5rem" }}
     >
       <h2
         style={{
@@ -27,6 +27,7 @@ export function MenuCategorySection({ category, sectionId }: Props) {
           display: "grid",
           gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
           gap: "1rem",
+          alignItems: "stretch",
         }}
       >
         {category.items.map((item) => (

@@ -19,6 +19,8 @@ export function MenuItemCard({ item }: Props) {
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
+        height: "100%",
+        minHeight: 0,
         background: "var(--background-elevated)",
       }}
     >
@@ -51,9 +53,11 @@ export function MenuItemCard({ item }: Props) {
           </span>
         )}
       </div>
-      {/* Текст под фото */}
+      {/* Текст + кнопка: кнопка прижата к низу карточки */}
       <div
         style={{
+          flex: 1,
+          minHeight: 0,
           padding: "0.65rem 0.75rem",
           display: "flex",
           flexDirection: "column",
@@ -65,6 +69,8 @@ export function MenuItemCard({ item }: Props) {
         </h3>
         <div
           style={{
+            flex: 1,
+            minHeight: 0,
             fontSize: "0.78rem",
             color: "var(--muted)",
             lineHeight: 1.35,
@@ -77,7 +83,8 @@ export function MenuItemCard({ item }: Props) {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            marginTop: "0.25rem",
+            marginTop: "auto",
+            paddingTop: "0.35rem",
           }}
         >
           {quantity > 0 ? (

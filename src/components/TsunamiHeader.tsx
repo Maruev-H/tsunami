@@ -2,43 +2,34 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
 import { useCart } from "../context/CartContext";
-import { useEffect, useState } from "react";
-
-function NavLink({ href, label }: { href: string; label: string }) {
-  const pathname = usePathname();
-  const active = pathname === href;
-
-  return (
-    <Link
-      href={href}
-      className="ts-nav-link"
-      data-active={active ? "true" : "false"}
-    >
-      {label}
-    </Link>
-  );
-}
 
 export function TsunamiHeader() {
-  const { totalItems } = useCart();
-  const pathname = usePathname();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  useEffect(() => {
-    setIsMenuOpen(false);
-  }, [pathname]);
+  const { totalItems, totalPrice } = useCart();
 
   const navContent = (
     <>
-      <NavLink href="/" label="Главная" />
-      <NavLink href="/menu" label="Меню" />
-      <NavLink href="/admin" label="Админ" />
-
-      <Link href="/cart" className="ts-cart-button">
-        <span>Корзина</span>
-        <span className="ts-cart-badge">{totalItems}</span>
+      <Link href="/cart" className="ts-cart-icon-link" aria-label="Корзина">
+        <svg
+          className="ts-cart-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <path
+            d="M3 4H5L6.6 14.2C6.68 14.7 7.12 15.06 7.63 15.06H17.9C18.37 15.06 18.78 14.74 18.89 14.28L20.3 8.28C20.45 7.65 19.97 7.06 19.32 7.06H6.2"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <circle cx="9" cy="19" r="1.4" fill="currentColor" />
+          <circle cx="17" cy="19" r="1.4" fill="currentColor" />
+        </svg>
+        <span className="ts-cart-icon-badge">
+          {totalItems} · {totalPrice} ₽
+        </span>
       </Link>
     </>
   );
@@ -46,7 +37,7 @@ export function TsunamiHeader() {
   return (
     <header className="ts-nav">
       <div className="ts-nav-inner">
-        <Link href="/" className="ts-logo">
+        <Link href="/menu" className="ts-logo">
           <Image
             src="/TsunamiLogo24.svg"
             alt="Tsunami"
@@ -64,31 +55,8 @@ export function TsunamiHeader() {
           >
             {navContent}
           </nav>
-
-          <button
-            type="button"
-            className="ts-nav-toggle"
-            aria-label={isMenuOpen ? "Закрыть меню" : "Открыть меню"}
-            aria-expanded={isMenuOpen}
-            aria-controls="tsunami-mobile-menu"
-            onClick={() => setIsMenuOpen((prev) => !prev)}
-          >
-            <span className="ts-nav-toggle-bar" />
-            <span className="ts-nav-toggle-bar" />
-            <span className="ts-nav-toggle-bar" />
-          </button>
         </div>
       </div>
-
-      <nav
-        id="tsunami-mobile-menu"
-        className={`ts-nav-links ts-nav-links-mobile${
-          isMenuOpen ? " ts-nav-links-mobile-open" : ""
-        }`}
-        aria-label="Основная навигация (мобильная)"
-      >
-        {navContent}
-      </nav>
     </header>
   );
 }

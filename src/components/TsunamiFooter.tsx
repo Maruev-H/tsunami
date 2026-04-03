@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 export function TsunamiFooter() {
   return (
     <footer className="ts-footer">
@@ -16,9 +14,6 @@ export function TsunamiFooter() {
         <div className="ts-footer-meta">
           <span>Часы работы: ежедневно с 11:00 до 23:00</span>
           <span>Онлайн-заказ через WhatsApp</span>
-          <Link href="/admin" className="ts-footer-link">
-            Вход для админов
-          </Link>
         </div>
       </div>
     </footer>

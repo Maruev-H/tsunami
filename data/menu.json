@@ -7,106 +7,32 @@
       "description": "Авторские роллы в стиле Tsunami.",
       "items": [
         {
-          "id": "tsunami-signature",
+          "id": "item-tsunami-signature",
           "name": "Tsunami Signature",
           "price": 890,
           "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
           "description": "Лосось, угорь, огурец, _сливочный сыр_, соус унаги и **хрустящий темпура-кранч**."
         },
         {
-          "id": "veggie-wave",
+          "id": "item-veggie-wave",
           "name": "Veggie Wave",
           "price": 680,
           "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
           "description": "Ролл для тех, кто выбирает легкость: авокадо, огурец, манго, кунжут и соус понзу."
-        }
-      ]
-    },
-    {
-      "id": "rolls",
-      "name": "Роллы 1",
-      "slug": "rolls",
-      "description": "Авторские роллы в стиле Tsunami.",
-      "items": [
-        {
-          "id": "tsunami-signature",
-          "name": "Tsunami Signature",
-          "price": 890,
-          "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
-          "description": "Лосось, угорь, огурец, _сливочный сыр_, соус унаги и **хрустящий темпура-кранч**."
         },
         {
-          "id": "veggie-wave",
-          "name": "Veggie Wave",
-          "price": 680,
+          "id": "item-spicy-california",
+          "name": "Spicy California",
+          "price": 720,
           "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
-          "description": "Ролл для тех, кто выбирает легкость: авокадо, огурец, манго, кунжут и соус понзу."
-        }
-      ]
-    },
-    {
-      "id": "rolls",
-      "name": "Роллы 3",
-      "slug": "rolls",
-      "description": "Авторские роллы в стиле Tsunami.",
-      "items": [
-        {
-          "id": "tsunami-signature",
-          "name": "Tsunami Signature",
-          "price": 890,
-          "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
-          "description": "Лосось, угорь, огурец, _сливочный сыр_, соус унаги и **хрустящий темпура-кранч**."
+          "description": "Краб, огурец, авокадо, **острый соус** и кунжут."
         },
         {
-          "id": "veggie-wave",
-          "name": "Veggie Wave",
-          "price": 680,
-          "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
-          "description": "Ролл для тех, кто выбирает легкость: авокадо, огурец, манго, кунжут и соус понзу."
-        }
-      ]
-    },
-    {
-      "id": "rolls",
-      "name": "Ролл 2 ы",
-      "slug": "rolls",
-      "description": "Авторские роллы в стиле Tsunami.",
-      "items": [
-        {
-          "id": "tsunami-signature",
-          "name": "Tsunami Signature",
-          "price": 890,
-          "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
-          "description": "Лосось, угорь, огурец, _сливочный сыр_, соус унаги и **хрустящий темпура-кранч**."
-        },
-        {
-          "id": "veggie-wave",
-          "name": "Veggie Wave",
-          "price": 680,
-          "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
-          "description": "Ролл для тех, кто выбирает легкость: авокадо, огурец, манго, кунжут и соус понзу."
-        }
-      ]
-    },
-    {
-      "id": "rolls",
-      "name": "не Роллы",
-      "slug": "rolls",
-      "description": "Авторские роллы в стиле Tsunami.",
-      "items": [
-        {
-          "id": "tsunami-signature",
-          "name": "Tsunami Signature",
-          "price": 890,
-          "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
-          "description": "Лосось, угорь, огурец, _сливочный сыр_, соус унаги и **хрустящий темпура-кранч**."
-        },
-        {
-          "id": "veggie-wave",
-          "name": "Veggie Wave",
-          "price": 680,
-          "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
-          "description": "Ролл для тех, кто выбирает легкость: авокадо, огурец, манго, кунжут и соус понзу."
+          "id": "-----mnhfinwb",
+          "name": "Любой тест вай еш йу",
+          "price": 233,
+          "image": "/images/placeholder-dish.svg",
+          "description": "фыавфыв"
         }
       ]
     },
@@ -114,42 +40,28 @@
       "id": "mains",
       "name": "Основные блюда",
       "slug": "mains",
-      "description": "Сильная волна вкуса — горячие блюда и боулы.",
+      "description": "Горячие блюда и боулы.",
       "items": [
         {
-          "id": "ramen-ocean",
+          "id": "item-ramen-ocean",
           "name": "Рамен Ocean",
           "price": 940,
           "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
           "description": "Насыщенный _курино-рыбный_ бульон, пшеничная лапша, яйцо су-вид, нори и чили-масло."
         },
         {
-          "id": "ramen-ocean",
-          "name": "Рамен Ocean",
-          "price": 940,
-          "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
-          "description": "Насыщенный _курино-рыбный_ бульон, пшеничная лапша, яйцо су-вид, нори и чили-масло."
-        },
-        {
-          "id": "ramen-ocean",
-          "name": "Рамен Ocean",
-          "price": 940,
-          "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
-          "description": "Насыщенный _курино-рыбный_ бульон, пшеничная лапша, яйцо су-вид, нори и чили-масло."
-        },
-        {
-          "id": "ramen-ocean",
-          "name": "Рамен Ocean",
-          "price": 940,
-          "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
-          "description": "Насыщенный _курино-рыбный_ бульон, пшеничная лапша, яйцо су-вид, нори и чили-масло."
-        },
-        {
-          "id": "poke-tuna",
+          "id": "item-poke-tuna",
           "name": "Поке с тунцом",
           "price": 860,
           "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
           "description": "Рис, маринованный тунец, эдамаме, авокадо, водоросли вакаме и соус терияки."
+        },
+        {
+          "id": "item-teriyaki-bowl",
+          "name": "Терияки-боул",
+          "price": 780,
+          "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
+          "description": "Рис, курица в соусе терияки, овощи вок и кунжут."
         }
       ]
     },
@@ -157,49 +69,50 @@
       "id": "drinks",
       "name": "Напитки",
       "slug": "drinks",
-      "description": "Авторские лимонады и чайные миксы.",
+      "description": "Лимонады и чайные миксы.",
       "items": [
         {
-          "id": "yuzu-soda",
+          "id": "item-yuzu-soda",
           "name": "Юдзу-сода",
           "price": 350,
           "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
           "description": "Игривый лимонад с юдзу, лаймом и **газированной водой**."
         },
         {
-          "id": "yuzu-soda",
-          "name": "Юдзу-сода",
-          "price": 350,
-          "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
-          "description": "Игривый лимонад с юдзу, лаймом и **газированной водой**."
-        },
-        {
-          "id": "yuzu-soda",
-          "name": "Юдзу-сода",
-          "price": 350,
-          "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
-          "description": "Игривый лимонад с юдзу, лаймом и **газированной водой**."
-        },
-        {
-          "id": "yuzu-soda",
-          "name": "Юдзу-сода",
-          "price": 350,
-          "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
-          "description": "Игривый лимонад с юдзу, лаймом и **газированной водой**."
-        },
-        {
-          "id": "yuzu-soda",
-          "name": "Юдзу-сода",
-          "price": 350,
-          "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
-          "description": "Игривый лимонад с юдзу, лаймом и **газированной водой**."
-        },
-        {
-          "id": "matcha-tonic",
+          "id": "item-matcha-tonic",
           "name": "Матча-тоник",
           "price": 390,
           "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
           "description": "Матча, тоник, цитрусовый микс и лед — идеальный _освежающий баланс_."
+        },
+        {
+          "id": "item-jasmine-cold",
+          "name": "Жасминовый холодный чай",
+          "price": 280,
+          "image": "https://spacesushi.moscow/__/images/menuProduct/6800b64cf13c4.webp",
+          "description": "Настой жасмина, лёгкая сладость, лёд."
+        }
+      ]
+    },
+    {
+      "id": "-",
+      "slug": "-",
+      "name": "ТЕстовая категория",
+      "description": "",
+      "items": [
+        {
+          "id": "----mnhfjnos",
+          "name": "Блюдо для тестовой категории",
+          "price": 2133,
+          "image": "/images/placeholder-dish.svg",
+          "description": "Описание жиес"
+        },
+        {
+          "id": "-mnhftbit",
+          "name": "ывапывап",
+          "price": 234,
+          "image": "https://s3.regru.cloud/tsunami/menu/1775132088934-cd8f1b63bed21630.png",
+          "description": "23а"
         }
       ]
     }

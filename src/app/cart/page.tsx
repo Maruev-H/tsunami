@@ -1,19 +1,57 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { useCart } from "../../context/CartContext";
 
-const WHATSAPP_PHONE = "79991234567"; // без +, только цифры
+const WHATSAPP_PHONE = "79389979790"; // без +, только цифры
+
+type FulfillmentType = "delivery" | "pickup" | "dine_in";
+type PaymentType = "cash" | "card";
+
+const FULFILLMENT_LABEL: Record<FulfillmentType, string> = {
+  delivery: "Доставка",
+  pickup: "Самовывоз",
+  dine_in: "В зале",
+};
+
+const PAYMENT_LABEL: Record<PaymentType, string> = {
+  cash: "Наличные",
+  card: "Безнал (карта)",
+};
+
+function isDetailsValidForFulfillment(
+  details: string,
+  fulfillment: FulfillmentType,
+): boolean {
+  if (fulfillment !== "delivery") return true;
+  return details.trim().length >= 8;
+}
 
 export default function CartPage() {
-  const { items, totalItems, totalPrice, updateQuantity, removeItem, clear } = useCart();
+  const { items, totalItems, totalPrice, updateQuantity, removeItem, clear } =
+    useCart();
+  const [fulfillment, setFulfillment] = useState<FulfillmentType>("delivery");
+  const [payment, setPayment] = useState<PaymentType>("cash");
   const [address, setAddress] = useState("");
   const [note, setNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const hasItems = items.length > 0;
-  const isAddressValid = address.trim().length >= 8;
+  const isAddressValid = isDetailsValidForFulfillment(address, fulfillment);
+
+  const addressField = useMemo(() => {
+    if (fulfillment !== "delivery") return null;
+    return {
+      label: (
+        <>
+          Адрес доставки<span style={{ color: "var(--danger)" }}>*</span>
+        </>
+      ),
+      placeholder: "Город, улица, дом, подъезд, домофон",
+      hint: "Не менее 8 символов",
+    };
+  }, [fulfillment]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -24,7 +62,7 @@ export default function CartPage() {
       return;
     }
     if (!isAddressValid) {
-      setError("Пожалуйста, укажите адрес (минимум несколько слов).");
+      setError("Укажите полный адрес доставки (не менее 8 символов).");
       return;
     }
 
@@ -33,16 +71,22 @@ export default function CartPage() {
     const lines = [
       "Здравствуйте! Хочу оформить заказ в Tsunami:",
       "",
+      `Способ получения: ${FULFILLMENT_LABEL[fulfillment]}`,
+      `Оплата: ${PAYMENT_LABEL[payment]}`,
+      "",
       ...items.map(
-        (item) => `• ${item.name} — ${item.quantity} шт. × ${item.price} ₽ = ${
-          item.price * item.quantity
-        } ₽`,
+        (item) =>
+          `• ${item.name} — ${item.quantity} шт. × ${item.price} ₽ = ${
+            item.price * item.quantity
+          } ₽`,
       ),
       "",
       `Итого: ${totalPrice} ₽`,
-      "",
-      `Адрес: ${address.trim()}`,
     ];
+
+    if (fulfillment === "delivery") {
+      lines.push("", `Адрес: ${address.trim()}`);
+    }
 
     if (note.trim()) {
       lines.push(`Комментарий: ${note.trim()}`);
@@ -61,8 +105,10 @@ export default function CartPage() {
       <div className="ts-page-header">
         <h1 className="ts-page-title">Ваш заказ</h1>
         <p className="ts-page-subtitle">
-          Проверьте позиции и укажите адрес. Нажмите «Оформить заказ» — мы получим заявку
-          в WhatsApp и подтвердим детали.
+          Проверьте позиции, выберите способ получения и оплату. Адрес
+          указывается только при доставке; для самовывоза и заказа в зале при
+          необходимости напишите детали в комментарии. Нажмите «Оформить заказ»
+          — заявка уйдёт в WhatsApp.
         </p>
       </div>
 
@@ -72,7 +118,15 @@ export default function CartPage() {
           style={{ padding: "1rem 1.1rem", minHeight: "160px" }}
         >
           {hasItems ? (
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: "0.6rem" }}>
+            <ul
+              style={{
+                listStyle: "none",
+                padding: 0,
+                margin: 0,
+                display: "grid",
+                gap: "0.6rem",
+              }}
+            >
               {items.map((item) => (
                 <li
                   key={item.id}
@@ -85,7 +139,14 @@ export default function CartPage() {
                     paddingBottom: "0.55rem",
                   }}
                 >
-                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                  <div
+                    style={{
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.25rem",
+                    }}
+                  >
                     <div
                       style={{
                         display: "flex",
@@ -93,7 +154,9 @@ export default function CartPage() {
                         gap: "0.5rem",
                       }}
                     >
-                      <span style={{ fontSize: "0.9rem", fontWeight: 500 }}>{item.name}</span>
+                      <span style={{ fontSize: "0.9rem", fontWeight: 500 }}>
+                        {item.name}
+                      </span>
                       <span
                         style={{
                           fontSize: "0.85rem",
@@ -113,7 +176,12 @@ export default function CartPage() {
                     >
                       <button
                         type="button"
-                        onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                        onClick={() =>
+                          updateQuantity(
+                            item.id,
+                            Math.max(1, item.quantity - 1),
+                          )
+                        }
                         style={{
                           width: 24,
                           height: 24,
@@ -129,7 +197,9 @@ export default function CartPage() {
                       <span>{item.quantity}</span>
                       <button
                         type="button"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() =>
+                          updateQuantity(item.id, item.quantity + 1)
+                        }
                         style={{
                           width: 24,
                           height: 24,
@@ -173,7 +243,8 @@ export default function CartPage() {
             </ul>
           ) : (
             <p style={{ fontSize: "0.9rem", color: "var(--muted)" }}>
-              Ваша корзина пуста. Перейдите в раздел «Меню», чтобы добавить блюда.
+              Ваша корзина пуста. Перейдите в раздел «Меню», чтобы добавить
+              блюда.
             </p>
           )}
 
@@ -196,7 +267,17 @@ export default function CartPage() {
               </span>
               <button
                 type="button"
-                onClick={clear}
+                onClick={() => {
+                  if (
+                    !window.confirm(
+                      "Очистить корзину? Все выбранные позиции будут удалены.",
+                    )
+                  ) {
+                    return;
+                  }
+                  clear();
+                  window.alert("Корзина очищена.");
+                }}
                 style={{
                   borderRadius: "999px",
                   padding: "0.3rem 0.7rem",
@@ -214,7 +295,10 @@ export default function CartPage() {
         </section>
 
         <section className="ts-card" style={{ padding: "1rem 1.1rem" }}>
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.7rem" }}>
+          <form
+            onSubmit={handleSubmit}
+            style={{ display: "flex", flexDirection: "column", gap: "0.7rem" }}
+          >
             <div
               style={{
                 display: "flex",
@@ -222,32 +306,130 @@ export default function CartPage() {
                 alignItems: "baseline",
               }}
             >
-              <span style={{ fontSize: "0.9rem", color: "var(--muted)" }}>Сумма заказа</span>
-              <span style={{ fontSize: "1.1rem", fontWeight: 600 }}>{totalPrice} ₽</span>
+              <span style={{ fontSize: "0.9rem", color: "var(--muted)" }}>
+                Сумма заказа
+              </span>
+              <span style={{ fontSize: "1.1rem", fontWeight: 600 }}>
+                {totalPrice} ₽
+              </span>
             </div>
 
-            <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-              <span style={{ fontSize: "0.8rem" }}>
-                Адрес доставки или самовывоза<span style={{ color: "var(--danger)" }}>*</span>
-              </span>
-              <textarea
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                rows={3}
-                placeholder="Город, улица, дом, подъезд / отметка о самовывозе"
-                style={{
-                  resize: "vertical",
-                  borderRadius: "var(--radius-md)",
-                  border: "1px solid var(--border-subtle)",
-                  padding: "0.6rem 0.7rem",
-                  background: "#ffffff",
-                  color: "#111827",
-                  fontSize: "0.85rem",
-                }}
-              />
-            </label>
+            <fieldset
+              style={{
+                border: "none",
+                margin: 0,
+                padding: 0,
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.45rem",
+              }}
+            >
+              <legend style={{ fontSize: "0.8rem", marginBottom: "0.15rem" }}>
+                Способ получения
+                <span style={{ color: "var(--danger)" }}>*</span>
+              </legend>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                {(["delivery", "pickup", "dine_in"] as const).map((key) => (
+                  <label
+                    key={key}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.35rem",
+                      fontSize: "0.85rem",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="fulfillment"
+                      checked={fulfillment === key}
+                      onChange={() => {
+                        setFulfillment(key);
+                        if (key === "pickup" || key === "dine_in")
+                          setAddress("");
+                      }}
+                    />
+                    {FULFILLMENT_LABEL[key]}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
 
-            <label style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+            <fieldset
+              style={{
+                border: "none",
+                margin: 0,
+                padding: 0,
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.45rem",
+              }}
+            >
+              <legend style={{ fontSize: "0.8rem", marginBottom: "0.15rem" }}>
+                Тип оплаты<span style={{ color: "var(--danger)" }}>*</span>
+              </legend>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                {(["cash", "card"] as const).map((key) => (
+                  <label
+                    key={key}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.35rem",
+                      fontSize: "0.85rem",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="payment"
+                      checked={payment === key}
+                      onChange={() => setPayment(key)}
+                    />
+                    {PAYMENT_LABEL[key]}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            {addressField && (
+              <label
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.35rem",
+                }}
+              >
+                <span style={{ fontSize: "0.8rem" }}>{addressField.label}</span>
+                <textarea
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  rows={3}
+                  placeholder={addressField.placeholder}
+                  style={{
+                    resize: "vertical",
+                    borderRadius: "var(--radius-md)",
+                    border: "1px solid var(--border-subtle)",
+                    padding: "0.6rem 0.7rem",
+                    background: "#ffffff",
+                    color: "#111827",
+                    fontSize: "0.85rem",
+                  }}
+                />
+                <span style={{ fontSize: "0.72rem", color: "var(--muted)" }}>
+                  {addressField.hint}
+                </span>
+              </label>
+            )}
+
+            <label
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.35rem",
+              }}
+            >
               <span style={{ fontSize: "0.8rem" }}>Комментарий к заказу</span>
               <textarea
                 value={note}
@@ -284,7 +466,10 @@ export default function CartPage() {
                 color: "#f9fafb",
                 fontWeight: 500,
                 fontSize: "0.9rem",
-                cursor: !hasItems || !isAddressValid || isSubmitting ? "not-allowed" : "pointer",
+                cursor:
+                  !hasItems || !isAddressValid || isSubmitting
+                    ? "not-allowed"
+                    : "pointer",
                 opacity: !hasItems || !isAddressValid || isSubmitting ? 0.6 : 1,
               }}
             >
@@ -292,8 +477,9 @@ export default function CartPage() {
             </button>
 
             <p style={{ fontSize: "0.75rem", color: "var(--muted)" }}>
-              Нажимая кнопку, вы будете перенаправлены в WhatsApp с автоматически
-              сформированным сообщением с составом заказа и адресом.
+              Нажимая кнопку, вы откроете WhatsApp с сообщением: состав заказа,
+              способ получения, оплата и при необходимости адрес или
+              комментарий.
             </p>
           </form>
         </section>
@@ -301,4 +487,3 @@ export default function CartPage() {
     </div>
   );
 }
-
